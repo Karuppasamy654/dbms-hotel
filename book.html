@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Buddy - Find Your Room</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* --- Styles for Consistent Width and Page Layout --- */
+        :root {
+            /* Assuming these variables are defined in style.css or used globally */
+            --primary-dark: #333;
+            --primary-orange: #f56e14;
+            --text-light: white;
+            --text-dark: #333;
+            --bg-light: #f9f9f9;
+            --card-bg: #ffffff;
+            --border-color: #ddd;
+            --card-shadow: rgba(0, 0, 0, 0.1);
+            --primary-green: #4CAF50;
+            --offer-badge-bg: #ef5350;
+            --secondary-gray: #ecf0f1;
+        }
+
+        /* Consistent Max Width for Header */
+        .home_header {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Main Content Layout (Consistent Width + Flex) */
+        .book_container {
+            max-width: 1200px; /* CONSISTENT WIDTH */
+            width: 95%; /* Responsive safety */
+            margin: 20px auto;
+            padding: 20px 0;
+            display: flex;
+            gap: 30px;
+            flex-grow: 1;
+        }
+
+        /* Sidebar and Listings Layout */
+        .filters_sidebar {
+            flex: 0 0 280px; /* Fixed width sidebar */
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px var(--card-shadow);
+        }
+        
+        .filter_group {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .filter_options label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+
+        
+        /* Style for the relocated input styles */
+        #hotel-search {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .hotel_listings {
+            flex-grow: 1;
+        }
+        
+        .hotel_listings h2 {
+            margin-top: 0;
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--primary-orange);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Hotel Card Grid */
+        .hotel_card_grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        /* Hotel Card Styles */
+        .hotel_card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        .hotel_card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        .card_image {
+            height: 200px;
+            overflow: hidden;
+        }
+        .card_image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .card_info {
+            padding: 15px;
+        }
+        .card_title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .card_title h4 {
+            margin: 0;
+            font-size: 1.2em;
+            color: var(--primary-dark);
+        }
+        .card_rating {
+            color: #ffc107; /* Gold star color */
+        }
+        .card_price_offer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card_price {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: var(--primary-orange);
+        }
+        .card_offer {
+            font-size: 0.9em;
+            color: var(--offer-badge-bg);
+            font-weight: 600;
+        }
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #777;
+            font-size: 1.1em;
+            background: var(--card-bg);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .no-results i {
+            margin-right: 10px;
+            color: var(--offer-badge-bg);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4); 
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: var(--bg-light);
+            margin: 5% auto; 
+            padding: 30px;
+            border: 1px solid #888;
+            width: 80%; 
+            max-width: 900px; /* Max width for modal */
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+            animation: zoomIn 0.3s;
+        }
+        @keyframes zoomIn {
+            from {transform: scale(0.9); opacity: 0;}
+            to {transform: scale(1); opacity: 1;}
+        }
+
+        .close-btn {
+            color: var(--primary-dark);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--primary-orange);
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-rating {
+            color: #ffc107;
+            font-size: 1.2em;
+        }
+
+        .modal-main-img {
+            width: 100%;
+            max-height: 350px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .modal-details-grid {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .detail-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            text-align: center;
+            background-color: var(--card-bg);
+        }
+        .detail-box.full-width {
+            flex-basis: 100%;
+            text-align: left;
+        }
+        .detail-box .big-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary-orange);
+            margin: 5px 0;
+        }
+        .detail-box .small-text {
+            font-size: 0.8em;
+            color: #777;
+        }
+
+        .modal-facilities-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+        .modal-facility-item {
+            background-color: var(--secondary-gray);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: var(--text-dark);
+        }
+        .modal-facility-item i {
+            color: var(--primary-green);
+            margin-right: 5px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        .modal-price .price-big {
+            font-size: 2em;
+            color: var(--offer-badge-bg);
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .modal-price .offer-text {
+             font-size: 0.9em;
+             color: var(--primary-green);
+        }
+
+        .modal-book-btn {
+            background-color: var(--primary-orange);
+            color: var(--text-light);
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .modal-book-btn:hover {
+            background-color: #d85c0f;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            .book_container {
+                flex-direction: column;
+            }
+            .filters_sidebar {
+                flex: 0 0 auto;
+            }
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+                padding: 20px;
+            }
+            .modal-details-grid {
+                flex-direction: column;
+            }
+            .detail-box {
+                min-width: 100%;
+            }
+            .modal-footer {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+        
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 20px;
+  border-radius: 5px;
+  color: white;
+  z-index: 10000;
+  animation: slideIn 0.3s ease-out;
+}
+
+.notification.success { background-color: #4CAF50; }
+.notification.error { background-color: #f44336; }
+.notification.info { background-color: #2196F3; }
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.modal {
+  display: block;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+  border-radius: 10px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover { color: #000; }
+
+.booking-card {
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.food-item {
+  border: 1px solid #eee;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+}
+
+.quantity-controls {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.quantity-controls button {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #ddd;
+  background-color: #f5f5f5;
+  cursor: pointer;
+}
+
+.quantity-controls span {
+  display: inline-block;
+  width: 30px;
+  text-align: center;
+  margin: 0 5px;
+}
+
+    </style>
+</head>
+<body>
+    <header class="home_head">
+        <div class="home_header">
+            <div class="home_heading">
+                <h1>Book <span class="buddy">Buddy</span></h1>
+            </div>
+            <div class="home_links">
+                <nav class="home_nav">
+                    <a href="index.html">Home</a>
+                    <a href="room.html">Rooms</a>
+                    <a href="login.html" class="btn">Sign in</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+    <hr class="header-hr">
+
+    <main class="book_container">
+        <aside class="filters_sidebar">
+            <h3>Filter Facilities</h3>
+
+            <div class="filter_group">
+                <h4>Search Hotel Name <i class="fas fa-hotel"></i></h4>
+                <input type="text" id="hotel-search" placeholder="e.g., Taj or Leela" 
+                       oninput="updateFilters()">
+            </div>
+
+            <div class="filter_group">
+                <h4>Your Location <i class="fas fa-location-dot"></i></h4>
+                <button onclick="getUserLocation()" id="location-btn" 
+                        style="background: var(--primary-orange); color: white; padding: 10px; border: none; border-radius: 5px; width: 100%; cursor: pointer; margin-bottom: 10px;">
+                    <i class="fas fa-crosshairs"></i> Get My Location
+                </button>
+                <div class="price-range-display" id="location-display" style="font-size: 0.9em; color: #666; text-align: center;">Location not set.</div>
+                <div class="filter_options" id="proximity-filter" style="margin-top: 10px; display: none;">
+                    <label><input type="checkbox" class="facility-checkbox" value="nearby" onchange="updateFilters()"> Show Nearby Hotels Only</label>
+                </div>
+            </div>
+            
+            <div class="filter_group">
+                <h4>Price Range 💰</h4>
+                <input type="range" id="price-slider" min="1000" max="25000" value="25000" step="1000" oninput="updateFilters()">
+                <div class="price-range-display">Max: <span id="max-price">₹25,000</span></div>
+            </div>
+
+            <div class="filter_group">
+                <h4>Rating <i class="fas fa-star" style="color:#ffc107;"></i></h4>
+                <div class="filter_options">
+                    <label><input type="checkbox" class="rating-checkbox" value="5" onchange="updateFilters()"> 5 Stars</label>
+                    <label><input type="checkbox" class="rating-checkbox" value="4" onchange="updateFilters()"> 4+ Stars</label>
+                    <label><input type="checkbox" class="rating-checkbox" value="3" onchange="updateFilters()"> 3+ Stars</label>
+                </div>
+            </div>
+
+            <div class="filter_group">
+                <h4>Room Type <i class="fas fa-thermometer-half"></i></h4>
+                <div class="filter_options">
+                    <label><input type="checkbox" class="facility-checkbox" value="acRooms" onchange="updateFilters()"> AC Rooms Available</label>
+                    <label><input type="checkbox" class="facility-checkbox" value="nonAcRooms" onchange="updateFilters()"> Non-AC Rooms Available</label>
+                </div>
+            </div>
+
+            <div class="filter_group">
+                <h4>Food & Dining <i class="fas fa-utensils"></i></h4>
+                <div class="filter_options">
+                    <label><input type="checkbox" class="facility-checkbox" value="breakfast" onchange="updateFilters()"> Breakfast Included</label>
+                    <label><input type="checkbox" class="facility-checkbox" value="lunch" onchange="updateFilters()"> Lunch Included</label>
+                    <label><input type="checkbox" class="facility-checkbox" value="dinner" onchange="updateFilters()"> Dinner Included</label>
+                    <label><input type="checkbox" class="facility-checkbox" value="veg" onchange="updateFilters()"> Vegetarian Only</label>
+                    <label><input type="checkbox" class="facility-checkbox" value="nonVeg" onchange="updateFilters()"> Non-Vegetarian Available</label>
+                    <label><input type="checkbox" class="facility-checkbox" value="both" onchange="updateFilters()"> Both Veg & Non-Veg</label>
+                    <label><input type="checkbox" class="facility-checkbox" value="barLounge" onchange="updateFilters()"> Bar/Lounge</label>
+                </div>
+            </div>
+
+            <div class="filter_group">
+                <h4>Other Amenities <i class="fas fa-concierge-bell"></i></h4>
+                <div class="filter_options">
+                    <label><input type="checkbox" class="facility-checkbox" value="suite" onchange="updateFilters()"> Suite Rooms</label>
+                    <label><input type="checkbox" class="facility-checkbox" value="swimmingPool" onchange="updateFilters()"> Swimming Pool</label>
+                    <label><input type="checkbox" class="facility-checkbox" value="sunView" onchange="updateFilters()"> Sun View</label>
+                    <label><input type="checkbox" class="facility-checkbox" value="laundry" onchange="updateFilters()"> Laundry Service</label>
+                    <label><input type="checkbox" class="facility-checkbox" value="gym" onchange="updateFilters()"> Gym/Fitness</label>
+                    <label><input type="checkbox" class="facility-checkbox" value="spa" onchange="updateFilters()"> Spa / Wellness</label>
+                    <label><input type="checkbox" class="facility-checkbox" value="resort" onchange="updateFilters()"> Resort Property</label>
+                    <label><input type="checkbox" class="facility-checkbox" value="cityCenter" onchange="updateFilters()"> City Center</label>
+                    <label><input type="checkbox" class="facility-checkbox" value="beachFront" onchange="updateFilters()"> Beach Front</label>
+                    <label><input type="checkbox" class="facility-checkbox" value="petFriendly" onchange="updateFilters()"> Pet Friendly</label>
+                </div>
+            </div>
+            
+            <button onclick="clearFilters()" style="background: var(--primary-dark); color: var(--text-light); padding: 10px; border: none; border-radius: 5px; width: 100%; cursor: pointer;">Clear Filters</button>
+
+        </aside>
+
+        <section class="hotel_listings">
+            <h2>Hotels Matching Your Search</h2>
+            
+            <p id="no-results" class="no-results" style="display:none;">
+                <i class="fas fa-exclamation-circle"></i> No hotels found matching your current filter criteria.
+            </p>
+
+            <div class="hotel_card_grid" id="hotel-card-grid">
+                </div>
+        </section>
+    </main>
+
+    <div id="hotel-detail-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div id="modal-details-container">
+                </div>
+        </div>
+    </div>
+    <hr class="footer-hr">
+    <footer>
+        <div>
+            <p>&copy; 2025 Book Buddy. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/database-manager.js"></script>
+    <script>
+        // --- SIMPLIFIED HOTEL DATA (10 Entries with 3-10 rooms each) ---
+        const hotelData = [
+            { id: 'trident', name: 'Trident Hotel', price: 15000, rating: 5, offer: '10% off AC Rooms', img: 'trident.jpg', facilities: ['suite', 'swimmingPool', 'cityCenter', 'laundry', 'gym', 'breakfast', 'both', 'acRooms', 'spa', 'barLounge'], 
+                rooms: {count: 8, types: ['AC Executive Suite', 'AC Deluxe King'], AC_RATE: 15000, NON_AC_RATE: 0}, coords: {lat: 13.045, lng: 80.205} },
+            { id: 'woodland', name: 'Woodlands Inn', price: 7500, rating: 3.5, offer: 'Non-AC Special', img: 'woodland.jpg', facilities: ['cityCenter', 'laundry', 'breakfast', 'veg', 'nonAcRooms'], 
+                rooms: {count: 5, types: ['Non-AC Standard', 'Non-AC Family'], AC_RATE: 0, NON_AC_RATE: 7500}, coords: {lat: 13.08, lng: 80.25} },
+            { id: 'leela-palace', name: 'The Leela Palace', price: 22000, rating: 5, offer: 'All-inclusive deal', img: 'the-leela-palace.jpg', facilities: ['suite', 'swimmingPool', 'sunView', 'laundry', 'beachFront', 'gym', 'breakfast', 'lunch', 'dinner', 'both', 'acRooms', 'spa', 'barLounge'], 
+                rooms: {count: 10, types: ['AC Presidential Suite', 'AC Ocean View'], AC_RATE: 22000, NON_AC_RATE: 0}, coords: {lat: 12.98, lng: 80.23} },
+            { id: 'taj-coromandel', name: 'Taj Coromandel', price: 17000, rating: 4.5, offer: 'Free Dinner', img: 'taj-coromandel.jpg', facilities: ['suite', 'swimmingPool', 'cityCenter', 'laundry', 'gym', 'dinner', 'both', 'acRooms'], 
+                rooms: {count: 7, types: ['AC Club Room', 'AC Executive Suite'], AC_RATE: 17000, NON_AC_RATE: 0}, coords: {lat: 13.06, lng: 80.26} },
+            { id: 'novotel', name: 'Novotel', price: 10000, rating: 4, offer: 'Family Deal', img: 'novotel.jpg', facilities: ['swimmingPool', 'cityCenter', 'gym', 'petFriendly', 'breakfast', 'lunch', 'both', 'acRooms', 'barLounge'], 
+                rooms: {count: 6, types: ['AC Superior', 'AC Standard'], AC_RATE: 10000, NON_AC_RATE: 0}, coords: {lat: 13.07, lng: 80.21} },
+            { id: 'taz-kamar-inn', name: 'Taz Kamar Inn', price: 5000, rating: 3, offer: 'Weekend Deal', img: 'taz-kamar-inn.jpg', facilities: ['cityCenter', 'breakfast', 'both', 'nonAcRooms'], 
+                rooms: {count: 4, types: ['Non-AC Economy', 'Non-AC Standard'], AC_RATE: 0, NON_AC_RATE: 5000}, coords: {lat: 13.03, lng: 80.25} },
+            { id: 'benzz-park', name: 'Benzz Park', price: 11000, rating: 4.2, offer: 'Luxury Stay', img: 'benzz-park.jpg', facilities: ['swimmingPool', 'laundry', 'gym', 'breakfast', 'both', 'acRooms'], 
+                rooms: {count: 9, types: ['AC Deluxe', 'AC Premium'], AC_RATE: 11000, NON_AC_RATE: 0}, coords: {lat: 13.09, lng: 80.20} },
+            { id: 'sheraton', name: 'Sheraton Grand', price: 14000, rating: 4.5, offer: 'Special Offer!', img: 'sheraton.jpg', facilities: ['suite', 'swimmingPool', 'sunView', 'laundry', 'beachFront', 'gym', 'resort', 'breakfast', 'lunch', 'dinner', 'both', 'acRooms', 'spa'], 
+                rooms: {count: 8, types: ['AC Beach Suite', 'AC Deluxe King'], AC_RATE: 14000, NON_AC_RATE: 0}, coords: {lat: 12.95, lng: 80.23} },
+            { id: 'ramada', name: 'Ramada Plaza', price: 7500, rating: 3.8, offer: '15% Off', img: 'ramada.jpg', facilities: ['cityCenter', 'laundry', 'breakfast', 'both', 'acRooms', 'nonAcRooms'], 
+                rooms: {count: 5, types: ['AC Standard', 'Non-AC Twin'], AC_RATE: 9000, NON_AC_RATE: 7500}, coords: {lat: 13.04, lng: 80.27} },
+            { id: 'itc-hotel', name: 'ITC Grand Chola', price: 25000, rating: 5, offer: 'Exclusive Deal', img: 'itc-hotel.jpg', facilities: ['suite', 'swimmingPool', 'laundry', 'gym', 'cityCenter', 'breakfast', 'lunch', 'dinner', 'both', 'acRooms', 'spa', 'barLounge'], 
+                rooms: {count: 10, types: ['AC Luxury Suite', 'AC Tower Room'], AC_RATE: 25000, NON_AC_RATE: 0}, coords: {lat: 13.01, lng: 80.21} }
+        ];
+
+        // --- GLOBAL STATE ---
+        let userLocation = null; 
+        const NEARBY_RADIUS_KM = 5; 
+
+        const cardGrid = document.getElementById('hotel-card-grid');
+        const priceSlider = document.getElementById('price-slider');
+        const maxPriceDisplay = document.getElementById('max-price');
+        const noResultsMessage = document.getElementById('no-results');
+        const modal = document.getElementById('hotel-detail-modal');
+        const modalContainer = document.getElementById('modal-details-container');
+        const locationDisplay = document.getElementById('location-display');
+        const proximityFilter = document.getElementById('proximity-filter');
+        const hotelSearchInput = document.getElementById('hotel-search');
+
+        // --- HELPER FUNCTIONS ---
+
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; 
+        }
+
+        function deg2rad(deg) {
+            return deg * (Math.PI/180)
+        }
+
+        function getStarRating(rating) {
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5 ? 'half-star' : '';
+            let stars = '';
+            for(let i=0; i < fullStars; i++) stars += '<i class="fas fa-star"></i>';
+            if (halfStar) stars += '<i class="fas fa-star-half-alt"></i>';
+            return stars;
+        }
+
+        function getFacilityIcon(facility) {
+            const map = {
+                suite: 'fas fa-door-closed', swimmingPool: 'fas fa-swimming-pool', sunView: 'fas fa-sun',
+                laundry: 'fas fa-tshirt', gym: 'fas fa-dumbbell', resort: 'fas fa-umbrella-beach',
+                cityCenter: 'fas fa-map-marker-alt', beachFront: 'fas fa-water', petFriendly: 'fas fa-paw',
+                breakfast: 'fas fa-coffee', lunch: 'fas fa-hamburger', dinner: 'fas fa-pizza-slice',
+                veg: 'fas fa-seedling', nonVeg: 'fas fa-drumstick-bite', both: 'fas fa-utensils',
+                spa: 'fas fa-hot-tub', barLounge: 'fas fa-cocktail', acRooms: 'fas fa-snowflake', nonAcRooms: 'fas fa-fan'
+            };
+            return map[facility] || 'fas fa-check-circle';
+        }
+
+        function getFacilityName(facility) {
+            const map = {
+                suite: 'Suite Rooms', swimmingPool: 'Swimming Pool', sunView: 'Sun View',
+                laundry: 'Laundry Service', gym: 'Gym/Fitness Center', resort: 'Resort Property',
+                cityCenter: 'City Center Location', beachFront: 'Beach Front', petFriendly: 'Pet Friendly',
+                breakfast: 'Breakfast Included', lunch: 'Lunch Included', dinner: 'Dinner Included',
+                veg: 'Vegetarian Options', nonVeg: 'Non-Vegetarian Available', both: 'Veg & Non-Veg',
+                spa: 'Spa / Wellness Center', barLounge: 'Bar / Lounge', acRooms: 'AC Rooms Available', nonAcRooms: 'Non-AC Rooms Available'
+            };
+            return map[facility] || facility;
+        }
+
+        function createHotelCard(hotel) {
+            const card = document.createElement('div');
+            card.className = 'hotel_card';
+            card.id = `card-${hotel.id}`;
+            card.setAttribute('onclick', `openModal('${hotel.id}')`);
+
+            let displayPrice = hotel.rooms.NON_AC_RATE > 0 ? hotel.rooms.NON_AC_RATE : hotel.rooms.AC_RATE;
+
+            card.innerHTML = `
+                <div class="card_image">
+                    <img src="${hotel.img}" alt="${hotel.name}">
+                </div>
+                <div class="card_info">
+                    <div class="card_title">
+                        <h4>${hotel.name}</h4>
+                        <div class="card_rating">${getStarRating(hotel.rating)}</div>
+                    </div>
+                    <div class="card_price_offer">
+                        <div class="card_price">₹${displayPrice.toLocaleString('en-IN')}</div>
+                        <div class="card_offer">${hotel.offer}</div>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        window.openModal = function(hotelId) {
+            const hotel = hotelData.find(h => h.id === hotelId);
+            if (!hotel) return;
+
+            // Pass the full hotel object to the bookNow function through a data attribute or directly
+            const hotelJson = JSON.stringify(hotel);
+
+            const startingRate = hotel.rooms.NON_AC_RATE > 0 ? hotel.rooms.NON_AC_RATE : hotel.rooms.AC_RATE;
+            const facilitiesHtml = hotel.facilities.map(f => `
+                <div class="modal-facility-item">
+                    <i class="${getFacilityIcon(f)}"></i> ${getFacilityName(f)}
+                </div>
+            `).join('');
+
+            let roomRateDetails = '';
+            if (hotel.rooms.AC_RATE > 0) {
+                roomRateDetails += `<p><i class="fas fa-snowflake"></i> <strong>AC Rooms</strong>: Starting at ₹${hotel.rooms.AC_RATE.toLocaleString('en-IN')}</p>`;
+            }
+            if (hotel.rooms.NON_AC_RATE > 0) {
+                roomRateDetails += `<p><i class="fas fa-fan"></i> <strong>Non-AC Rooms</strong>: Starting at ₹${hotel.rooms.NON_AC_RATE.toLocaleString('en-IN')}</p>`;
+            }
+            if (!roomRateDetails) {
+                roomRateDetails = `<p>Price details not fully specified.</p>`;
+            }
+
+            modalContainer.innerHTML = `
+                <div class="modal-header">
+                    <h2>${hotel.name}</h2>
+                    <div class="modal-rating">${getStarRating(hotel.rating)}</div>
+                </div>
+                <div class="modal-body">
+                    <img src="${hotel.img}" alt="${hotel.name}" class="modal-main-img">
+
+                    <div class="modal-details-grid">
+                        <div class="detail-box">
+                            <h4><i class="fas fa-wallet"></i> Starting Price</h4>
+                            <p class="big-number">₹${startingRate.toLocaleString('en-IN')}</p>
+                            <span class="small-text">Per Day (Lowest Room)</span>
+                        </div>
+                        <div class="detail-box">
+                            <h4><i class="fas fa-bed"></i> Total Rooms</h4>
+                            <p class="big-number">${hotel.rooms.count}</p>
+                            <span class="small-text">Available in the property</span>
+                        </div>
+                        <div class="detail-box full-width">
+                            <h4><i class="fas fa-list"></i> Room Types Available</h4>
+                            <p><strong>${hotel.rooms.types.join(' | ')}</strong></p>
+                            ${roomRateDetails}
+                        </div>
+                    </div>
+                    
+                    <h3><i class="fas fa-shield-alt"></i> Key Facilities</h3>
+                    <div class="modal-facilities-grid">
+                        ${facilitiesHtml}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="modal-price">
+                        Starting Price:
+                        <span class="price-big">₹${startingRate.toLocaleString('en-IN')}</span>
+                        <span class="offer-text">(${hotel.offer})</span>
+                    </div>
+                    <button class="modal-book-btn" onclick="bookNow('${hotel.id}')">
+                        Book Now <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            `;
+            modal.style.display = "block";
+        }
+
+        window.closeModal = function() {
+            modal.style.display = "none";
+        }
+
+        // ----------------------------------------------------------------------
+        // --- UPDATED bookNow FUNCTION for ROOM.HTML REDIRECT ---
+        // ----------------------------------------------------------------------
+        window.bookNow = function(hotelId) {
+            const hotel = hotelData.find(h => h.id === hotelId);
+            if (!hotel) {
+                alert("Error: Hotel data not found.");
+                return;
+            }
+
+            // 1. Prepare data to pass to room.html
+            const bookingDetails = {
+                id: hotel.id,
+                name: hotel.name,
+                lowestRate: hotel.rooms.NON_AC_RATE > 0 ? hotel.rooms.NON_AC_RATE : hotel.rooms.AC_RATE,
+                acRate: hotel.rooms.AC_RATE,
+                nonAcRate: hotel.rooms.NON_AC_RATE,
+                availableRooms: hotel.rooms.types,
+                // Pass all facilities to pre-select any included ones on room.html if needed
+                allFacilities: hotel.facilities
+            };
+            
+            // 2. Save data to Session Storage
+            // This allows room.html to retrieve which hotel was selected
+            sessionStorage.setItem('selectedHotel', JSON.stringify(bookingDetails));
+
+            // 3. Redirect to the room booking page
+            alert(`Initiating booking for ${hotel.name}. You will now select dates and room type on the next page.`);
+            window.location.href = 'room.html'; 
+        }
+        // ----------------------------------------------------------------------
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // --- GEOLOCATION LOGIC ---
+
+        window.getUserLocation = function() {
+            locationDisplay.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Locating...`;
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        locationDisplay.innerHTML = `<i class="fas fa-check-circle" style="color: var(--primary-green);"></i> Location Found!`;
+                        proximityFilter.style.display = 'block';
+                        updateFilters(); 
+                    },
+                    (error) => {
+                        userLocation = null;
+                        locationDisplay.innerHTML = `<i class="fas fa-exclamation-triangle" style="color: var(--offer-badge-bg);"></i> Location denied or error.`;
+                        proximityFilter.style.display = 'none';
+                        updateFilters(); 
+                        console.error("Geolocation Error: ", error);
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            } else {
+                locationDisplay.innerHTML = `Geolocation not supported by this browser.`;
+            }
+        }
+
+        // --- FILTERING AND RENDERING ---
+
+        function getActiveFilters() {
+            const maxPrice = parseInt(priceSlider.value);
+            const selectedRatings = Array.from(document.querySelectorAll('.rating-checkbox:checked'))
+                                        .map(cb => parseFloat(cb.value));
+            const selectedFacilities = Array.from(document.querySelectorAll('.facility-checkbox:checked'))
+                                            .map(cb => cb.value);
+            
+            const searchTerm = hotelSearchInput.value.toLowerCase().trim();
+            const isNearbyChecked = selectedFacilities.includes('nearby');
+
+            const actualFacilities = selectedFacilities.filter(f => f !== 'nearby');
+
+
+            return { maxPrice, selectedRatings, actualFacilities, searchTerm, isNearbyChecked };
+        }
+
+        function filterHotels(filters) {
+            return hotelData.filter(hotel => {
+                // 1. Hotel Name Search
+                if (filters.searchTerm && !hotel.name.toLowerCase().includes(filters.searchTerm)) {
+                    return false;
+                }
+
+                // 2. Price Filter
+                const lowestRate = hotel.rooms.NON_AC_RATE > 0 ? hotel.rooms.NON_AC_RATE : hotel.rooms.AC_RATE;
+                if (lowestRate > filters.maxPrice) return false;
+
+                // 3. Rating Filter
+                if (filters.selectedRatings.length > 0) {
+                    const matchesRating = filters.selectedRatings.some(minRating => hotel.rating >= minRating);
+                    if (!matchesRating) return false;
+                }
+
+                // 4. Proximity Filter 
+                if (filters.isNearbyChecked && userLocation) {
+                    const distance = getDistanceFromLatLonInKm(
+                        userLocation.lat, userLocation.lng,
+                        hotel.coords.lat, hotel.coords.lng
+                    );
+                    if (distance > NEARBY_RADIUS_KM) {
+                        return false;
+                    }
+                }
+
+                // 5. Facility Filter (AND logic)
+                if (filters.actualFacilities.length > 0) {
+                    const hasAllFacilities = filters.actualFacilities.every(facility => 
+                        hotel.facilities.includes(facility)
+                    );
+                    if (!hasAllFacilities) return false;
+                }
+
+                return true;
+            });
+        }
+
+        function renderHotels(filteredList) {
+            cardGrid.innerHTML = '';
+            if (filteredList.length === 0) {
+                noResultsMessage.style.display = 'block';
+                return;
+            }
+            noResultsMessage.style.display = 'none';
+
+            filteredList.forEach(hotel => {
+                cardGrid.appendChild(createHotelCard(hotel));
+            });
+        }
+
+        window.updateFilters = function() {
+            maxPriceDisplay.textContent = `₹${parseInt(priceSlider.value).toLocaleString('en-IN')}`;
+            const filters = getActiveFilters();
+            const filteredList = filterHotels(filters);
+            renderHotels(filteredList);
+        }
+
+        window.clearFilters = function() {
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            priceSlider.value = priceSlider.max;
+            hotelSearchInput.value = '';
+            updateFilters();
+        }
+
+        // --- REAL-TIME PRICE UPDATES ---
+        
+        // Setup database listener for real-time price updates
+        function setupPriceUpdateListener() {
+            // Wait for database manager to load
+            const checkDBManager = () => {
+                if (typeof dbManager !== 'undefined') {
+                    dbManager.addListener((event, data) => {
+                        console.log('Database event received:', event, data);
+                        if (event === 'hotelPricesUpdated' || event === 'dataUpdated') {
+                            updateHotelDataFromDatabase();
+                            updateFilters();
+                            showPriceUpdateNotification();
+                        }
+                    });
+                } else {
+                    setTimeout(checkDBManager, 100);
+                }
+            };
+            checkDBManager();
+        }
+
+        // Update hotel data from database
+        function updateHotelDataFromDatabase() {
+            if (typeof dbManager !== 'undefined') {
+                const dbHotels = dbManager.getAllHotels();
+                dbHotels.forEach(dbHotel => {
+                    const localHotel = hotelData.find(h => h.id === dbHotel.id);
+                    if (localHotel && dbHotel.pricing) {
+                        // Update prices from database
+                        localHotel.rooms.AC_RATE = dbHotel.pricing.standard || dbHotel.pricing.deluxe || dbHotel.pricing.suite || 0;
+                        localHotel.rooms.NON_AC_RATE = dbHotel.pricing.standard || 0;
+                        localHotel.price = Math.min(...Object.values(dbHotel.pricing));
+                        
+                        // Update the displayed price in the card
+                        const card = document.getElementById(`card-${localHotel.id}`);
+                        if (card) {
+                            const priceElement = card.querySelector('.card_price');
+                            if (priceElement) {
+                                const displayPrice = localHotel.rooms.NON_AC_RATE > 0 ? localHotel.rooms.NON_AC_RATE : localHotel.rooms.AC_RATE;
+                                priceElement.textContent = `₹${displayPrice.toLocaleString('en-IN')}`;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Show price update notification
+        function showPriceUpdateNotification() {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: #4CAF50;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                animation: slideInFromRight 0.3s ease-out;
+                max-width: 300px;
+            `;
+            notification.innerHTML = `
+                <i class="fas fa-sync-alt"></i> Hotel prices updated! Refresh to see latest rates.
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideInFromRight 0.3s ease-out reverse';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // --- INITIALIZATION ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            maxPriceDisplay.textContent = `₹${parseInt(priceSlider.max).toLocaleString('en-IN')}`;
+            setupPriceUpdateListener();
+            updateHotelDataFromDatabase();
+            updateFilters();
+        });
+    </script>
+    <script>
+     window.bookNow = function(hotelId) {
+        const hotel = hotelData.find(h => h.id === hotelId);
+        if (!hotel) {
+            alert("Error: Hotel data not found.");
+            return;
+        }
+
+        // Check if user is logged in
+        if (!api.token) {
+            alert('Please login to make a booking');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        // Prepare booking data
+        const bookingDetails = {
+            id: hotel.id,
+            name: hotel.name,
+            lowestRate: hotel.rooms.NON_AC_RATE > 0 ? hotel.rooms.NON_AC_RATE : hotel.rooms.AC_RATE,
+            acRate: hotel.rooms.AC_RATE,
+            nonAcRate: hotel.rooms.NON_AC_RATE,
+            availableRooms: hotel.rooms.types,
+            allFacilities: hotel.facilities
+        }
+    </script>
+    <script src="js/api-client.js"></script>
+    <script src="js/booking-manager.js"></script>
+    <script src="js/order-manager.js"></script>
+    <script src="js/manager-tools.js"></script>
+    
+    <!-- Add room booking functionality -->
+    <script>
+        // Get selected hotel from session storage
+        const selectedHotel = JSON.parse(sessionStorage.getItem('selectedHotel') || '{}');
+        
+        // Display hotel information
+        document.addEventListener('DOMContentLoaded', () => {
+            if (selectedHotel.name) {
+                document.getElementById('hotel-name').textContent = selectedHotel.name;
+                document.getElementById('hotel-rate').textContent = `₹${selectedHotel.lowestRate.toLocaleString()}`;
+            }
+        });
+        
+        // Handle room booking
+        async function bookRoom(roomNumber, checkInDate, checkOutDate) {
+            if (!api.token) {
+                alert('Please login to make a booking');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            try {
+                const result = await bookingManager.createBooking(
+                    selectedHotel.id,
+                    roomNumber,
+                    checkInDate,
+                    checkOutDate
+                );
+                  // Show success and redirect
+                  alert('Booking successful! You can now order food.');
+                window.location.href = 'book.html';
+                
+            } catch (error) {
+                console.error('Booking failed:', error);
+            }
+        }
+        
+        // Handle food order
+        function orderFood(bookingId) {
+            orderManager.showFoodOrderModal(bookingId);
+        }
+    </script>
+    
+    <!-- Add CSS for notifications and modals -->
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+        }
+        .notification.success { background-color: #4CAF50; }
+        .notification.error { background-color: #f44336; }
+        .notification.info { background-color: #2196F3; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        .modal {
+            display: block;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover { color: #000; }
+        
+        .food-item {
+            border: 1px solid #eee;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .quantity-controls {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .quantity-controls button {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ddd;
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+        .quantity-controls span {
+            display: inline-block;
+            width: 30px;
+            text-align: center;
+            margin: 0 5px;
+        }
+    </style>
+</body>
+</html>
